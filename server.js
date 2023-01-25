@@ -1,6 +1,11 @@
 import express from 'express';
 import dotenv from 'dotenv';
+
 import connectDB from './db/connect.js';
+
+// Routers
+import authRouter from './routes/authRoutes.js';
+import jobRouter from './routes/jobRoutes.js';
 
 // Middleware
 import notFoundMiddleware from './middleware/not-found.js';
@@ -10,11 +15,16 @@ const app = express();
 
 dotenv.config();
 
+app.use(express.json());
+
 app.get('/', (req, res) => {
 	res.send('Welcome!');
 });
-app.use(notFoundMiddleware);
 
+app.use('/api/v1/auth', authRouter);
+app.use('/api/v1/jobs', jobRouter);
+
+app.use(notFoundMiddleware);
 app.use(errorHandlerMiddleware);
 
 const port = process.env.PORT || 5001;
