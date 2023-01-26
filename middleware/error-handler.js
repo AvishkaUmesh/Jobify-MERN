@@ -10,7 +10,6 @@ const errorHandlerMiddleware = (err, req, res, next) => {
 
 	if (err.name === 'ValidationError') {
 		defaultError.status = StatusCodes.BAD_REQUEST;
-		// defaultError.message = err.message;
 		defaultError.message = Object.values(err.errors)
 			.map(val => val.message)
 			.join(',');
@@ -21,7 +20,6 @@ const errorHandlerMiddleware = (err, req, res, next) => {
 		defaultError.message = `${Object.keys(err.keyValue)} is already taken`;
 	}
 
-	// res.status(defaultError.status).json({ message: err });
 	res.status(defaultError.status).json({ message: defaultError.message });
 };
 
