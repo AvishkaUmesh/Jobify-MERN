@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useAppContext } from '../context/appContext';
 import { Logo, FormRow, Alert } from '../components';
 import Wrapper from '../assets/wrappers/RegisterPage';
@@ -12,8 +13,16 @@ const initialState = {
 
 const Register = () => {
 	const [values, setValues] = useState(initialState);
+	const { user, isLoading, showAlert, displayAlert, registerUser } = useAppContext();
+	const navigate = useNavigate();
 
-	const { isLoading, showAlert, displayAlert } = useAppContext();
+	useEffect(() => {
+		if (user) {
+			setTimeout(() => {
+				navigate('/');
+			}, 3000);
+		}
+	}, [user, navigate]);
 
 	const handleChange = e => {
 		setValues(prevState => {
@@ -24,13 +33,17 @@ const Register = () => {
 	const handleSubmit = e => {
 		e.preventDefault();
 		const { name, email, password, isMember } = values;
-
 		if (!email || !password || (!isMember && !name)) {
 			displayAlert();
 			return;
 		}
 
-		console.log(values);
+		const currentUser = { name, email, password };
+		if (isMember) {
+			console.log('already a member');
+		} else {
+			registerUser(currentUser);
+		}
 	};
 
 	const toggleMember = () => {
@@ -79,6 +92,7 @@ const Register = () => {
 				<button
 					type="submit"
 					className="btn btn-block"
+					disabled={isLoading}
 				>
 					Submit
 				</button>
