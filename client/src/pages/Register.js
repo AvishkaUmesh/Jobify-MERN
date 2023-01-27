@@ -13,7 +13,7 @@ const initialState = {
 
 const Register = () => {
 	const [values, setValues] = useState(initialState);
-	const { user, isLoading, showAlert, displayAlert, registerUser } = useAppContext();
+	const { user, isLoading, showAlert, displayAlert, setupUser } = useAppContext();
 	const navigate = useNavigate();
 
 	useEffect(() => {
@@ -40,9 +40,9 @@ const Register = () => {
 
 		const currentUser = { name, email, password };
 		if (isMember) {
-			console.log('already a member');
+			setupUser({ currentUser, endPoint: 'login', alertText: 'Login successful' });
 		} else {
-			registerUser(currentUser);
+			setupUser({ currentUser, endPoint: 'register', alertText: 'Registration successful' });
 		}
 	};
 

@@ -1,5 +1,6 @@
 import express from 'express';
 import dotenv from 'dotenv';
+import morgan from 'morgan';
 import 'express-async-errors';
 
 import connectDB from './db/connect.js';
@@ -17,6 +18,10 @@ const app = express();
 dotenv.config();
 
 app.use(express.json());
+
+if (process.env.NODE_ENV !== 'production') {
+	app.use(morgan('dev'));
+}
 
 app.get('/', (req, res) => {
 	res.send('Welcome!');
