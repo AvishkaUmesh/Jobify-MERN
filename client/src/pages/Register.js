@@ -61,7 +61,7 @@ const Register = () => {
 				<Logo />
 				<h3>{values.isMember ? 'Login' : 'Register'}</h3>
 
-				{showAlert && <Alert alertText="Invalid credentials" />}
+				{showAlert && <Alert />}
 
 				{!values.isMember && (
 					<FormRow
