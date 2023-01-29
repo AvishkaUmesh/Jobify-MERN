@@ -10,6 +10,9 @@ import {
 	SETUP_USER_ERROR,
 	TOGGLE_SIDEBAR,
 	LOGOUT_USER,
+	UPDATE_USER_BEGIN,
+	UPDATE_USER_SUCCESS,
+	UPDATE_USER_ERROR,
 } from './actions';
 
 const user = localStorage.getItem('user');
@@ -32,6 +35,33 @@ const AppContext = React.createContext();
 
 const AppProvider = ({ children }) => {
 	const [state, dispatch] = useReducer(reducer, initialState);
+
+	//axios
+	const authFetch = axios.create({
+		baseURL: '/api/v1',
+	});
+	// request interceptor
+	authFetch.interceptors.request.use(
+		config => {
+			config.headers['Authorization'] = `Bearer ${state.token}`;
+			return config;
+		},
+		error => {
+			return Promise.reject(error);
+		}
+	);
+	// response interceptor
+	authFetch.interceptors.response.use(
+		response => {
+			return response;
+		},
+		error => {
+			if (error.response.status === 401) {
+				logoutUser();
+			}
+			return Promise.reject(error);
+		}
+	);
 
 	const displayAlert = () => {
 		dispatch({ type: DISPLAY_ALERT });
@@ -73,6 +103,29 @@ const AppProvider = ({ children }) => {
 		removeUserFromLocalStorage();
 	};
 
+	const updateUser = async currentUser => {
+		dispatch({ type: UPDATE_USER_BEGIN });
+		try {
+			const { data } = await authFetch.patch('/auth/updateUser', currentUser);
+			const { user, token, location } = data;
+
+			dispatch({
+				type: UPDATE_USER_SUCCESS,
+				payload: { user, token, location },
+			});
+
+			addUserToLocalStorage({ user, location, token });
+		} catch (error) {
+			if (error.response.status !== 401) {
+				dispatch({
+					type: UPDATE_USER_ERROR,
+					payload: { message: error.response.data.message },
+				});
+			}
+		}
+		clearAlert();
+	};
+
 	const addUserToLocalStorage = ({ user, token, location }) => {
 		localStorage.setItem('user', JSON.stringify(user));
 		localStorage.setItem('token', token);
@@ -86,7 +139,7 @@ const AppProvider = ({ children }) => {
 	};
 
 	return (
-		<AppContext.Provider value={{ ...state, displayAlert, setupUser, toggleSidebar, logoutUser }}>
+		<AppContext.Provider value={{ ...state, displayAlert, setupUser, toggleSidebar, logoutUser, updateUser }}>
 			{children}
 		</AppContext.Provider>
 	);

@@ -40,9 +40,9 @@ const Register = () => {
 
 		const currentUser = { name, email, password };
 		if (isMember) {
-			setupUser({ currentUser, endPoint: 'login', alertText: 'Login successful' });
+			setupUser({ currentUser, endPoint: 'login', alertText: 'Login successful! Redirecting...' });
 		} else {
-			setupUser({ currentUser, endPoint: 'register', alertText: 'Registration successful' });
+			setupUser({ currentUser, endPoint: 'register', alertText: 'Registration successful! Redirecting...' });
 		}
 	};
 
