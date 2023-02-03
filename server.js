@@ -2,6 +2,12 @@ import express from 'express';
 import dotenv from 'dotenv';
 import morgan from 'morgan';
 import 'express-async-errors';
+import helmet from 'helmet';
+import xss from 'xss-clean';
+import mongoSanitize from 'express-mongo-sanitize';
+import { dirname } from 'path';
+import { fileURLToPath } from 'url';
+import path from 'path';
 
 import connectDB from './db/connect.js';
 
@@ -18,18 +24,26 @@ const app = express();
 
 dotenv.config();
 
-app.use(express.json());
+const __dirname = dirname(fileURLToPath(import.meta.url));
 
 if (process.env.NODE_ENV !== 'production') {
 	app.use(morgan('dev'));
 }
+app.use(express.json());
+app.use(helmet());
+app.use(xss());
+app.use(mongoSanitize());
 
-app.get('/', (req, res) => {
-	res.send('Welcome!');
-});
+// only when ready to deploy
+app.use(express.static(path.resolve(__dirname, './client/build')));
 
 app.use('/api/v1/auth', authRouter);
 app.use('/api/v1/jobs', authenticateUser, jobRouter);
+
+// only when ready to deploy
+app.get('*', function (request, response) {
+	response.sendFile(path.resolve(__dirname, './client/build', 'index.html'));
+});
 
 app.use(notFoundMiddleware);
 app.use(errorHandlerMiddleware);
